@@ -2,8 +2,12 @@
 //
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
+void trocar(Time* a, Time* b);
+int particionar(vector<Time>& vetor, int inicio, int final);
+void quickSort(vector<Time>& vetor, int inicio, int final);
 struct Time
 {
 	string nome;
@@ -18,3 +22,35 @@ int main()
 
 }
 
+
+
+void quickSort(vector<Time>& vetor, int inicio, int final) {
+    if (inicio < final)
+    {
+        int pi = particionar(vetor, inicio, final);
+        quickSort(vetor, inicio, pi - 1);
+        quickSort(vetor, pi + 1, final);
+    }
+}
+int particionar(vector<Time>& vetor, int inicio, int final)
+{
+    int pivo = vetor[final].pontos;
+    int i = (inicio - 1);
+
+    for (int j = inicio; j <= final - 1; j++)
+    {
+        if (vetor[j].pontos <= pivo)
+        {
+            i++;
+            trocar(&vetor[i], &vetor[j]);
+        }
+    }
+    trocar(&vetor[i + 1], &vetor[final]);
+    return (i + 1);
+}
+void trocar(Time* a, Time* b)
+{
+    Time aux = *a;
+    *a = *b;
+    *b = aux;
+}
