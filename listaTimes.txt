@@ -1,1 +1,7 @@
-listona cabulosa
+Vasco;54;20;10;10;
+Santos;70;20;10;10;
+Coritiba;10;2;3;4;
+Botafogo;2;2;2;2;
+Corinthians;80;30;20;10;
+Palmeiras;10;10;10;10;
+America;90;50;40;30;

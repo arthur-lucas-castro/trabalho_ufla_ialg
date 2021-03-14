@@ -31,3 +31,17 @@
 *.exe
 *.out
 *.app
+/x64/Debug/vc142.pdb
+/x64/Debug/vc142.idb
+/x64/Debug/Trabalho.vcxproj.FileListAbsolute.txt
+/x64/Debug/Trabalho.tlog/Trabalho.lastbuildstate
+/x64/Debug/Trabalho.tlog/link.write.1.tlog
+/x64/Debug/Trabalho.tlog/link.read.1.tlog
+/x64/Debug/Trabalho.tlog/link.command.1.tlog
+/x64/Debug/Trabalho.tlog/CL.write.1.tlog
+/x64/Debug/Trabalho.tlog/CL.read.1.tlog
+/x64/Debug/Trabalho.tlog/CL.command.1.tlog
+/x64/Debug/Trabalho.pdb
+/x64/Debug/Trabalho.log
+/x64/Debug/Trabalho.ilk
+/x64/Debug/Trabalho.exe.recipe
