@@ -5,6 +5,7 @@
 #include <fstream>  
 #include <sstream>
 #include <vector>
+#include <iomanip>
 using namespace std;
 
 struct Time
@@ -55,6 +56,7 @@ int main()
 			repetir = false;
 			break;
 		default:
+			repetir = false;
 			cout << "Escolha inválida";
 			break;
 		}
@@ -77,10 +79,13 @@ void leTime() {
 	arq.open(nomeArquivo);	
 
 	Time time;
-
+	cout << '|' << setw(10) << "NOME" << '|' << setw(10) << "PONTOS" << '|' << setw(10) << "VITORIAS" << '|' << setw(10) << "EMPATES" << '|' << setw(10) << "DERROTAS" << '|' << endl;
+	cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
 	while (arq.read((char*)&time, sizeof(Time)))
 	{
-		cout << time.nome << " " << time.pontos << " " << endl;
+		cout << '|' << setw(10) << time.nome << '|' << setw(10) << time.pontos << '|' << setw(10) << time.vitorias << '|' << setw(10) << time.empates << '|' << setw(10) << time.derrotas << '|' << endl;
+		cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
+		//cout << time.nome << " " << time.pontos << " " << endl;
 	}
 
 
@@ -123,8 +128,6 @@ void editarTime() {
 					cout << "-1. Voltar" << endl;
 					cin >> escolhaDoQueFazer;
 					EditarCampo(escolhaDoQueFazer, posicaoInicioTime, time);
-					
-					break;
 				}
 				posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
 			}
