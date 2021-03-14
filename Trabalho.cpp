@@ -7,11 +7,6 @@
 #include <vector>
 using namespace std;
 
-void insereTime();
-void leTime();
-void editarTime();
-string nomeArquivo = "listaTimes.txt";
-
 struct Time
 {
 	char nome[10];
@@ -19,7 +14,17 @@ struct Time
 	int vitorias;
 	int derrotas;
 	int empates;
+	int posicao;
 };
+
+void EditarCampo(int escolhaUsuario, int posicaoTime, Time time);
+void insereTime();
+void leTime();
+void editarTime();
+
+string nomeArquivo = "listaTimes.txt";
+
+
 
 int main()
 {
@@ -63,7 +68,6 @@ void insereTime() {
 	cin >> time.nome >> time.pontos >> time.vitorias >> time.derrotas >> time.empates;
 	arq.write((char*)&time, sizeof(time));
 
-	//arq << time.nome << ";" << time.pontos << ";" << time.vitorias << ";" << time.derrotas << ";" << time.empates << ";" << endl;
 	arq.close();
 }
 
@@ -89,19 +93,86 @@ void editarTime() {
 
 	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
 	string nome;
-	cin >> nome;
+	int escolhaDoQueFazer;
+	cout << "Qual o criterio para a ediçao:" << endl;
+	cout << "1. Por nome do time" << endl;
+	cout << "2. Por colocaçao do time na tabela" << endl;
+	cin >> escolhaDoQueFazer;
 	Time time;
-	int posicaoItemAnterior = 0;
-	while (arq.read((char*)&time, sizeof(Time)))
-	{		
-		if (time.nome == nome) {
-			
-			arqEscrita.seekp(posicaoItemAnterior);//aponta o ponteiro de escrita para a posicao desejada
-			cin >> time.nome;
-			arqEscrita.write((char*)&time, sizeof(Time));
-		}
-		posicaoItemAnterior = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+	int posicaoInicioTime = 0;
+	switch (escolhaDoQueFazer)
+	{
+		case 1:
+			cout << "Digite o nome do Time que deseja editar:" << endl;
+			cin >> nome;
+			while (arq.read((char*)&time, sizeof(Time)))
+			{
+				if (time.nome == nome) {
+				
+					cout << "Encontramos o time desejado, Atualmente essa é a situaçao dele:" << endl;
+					cout << "Nome: " << time.nome << endl;
+					cout << "Pontos: " << time.pontos << endl;
+					cout << "Vitorias: " << time.vitorias << endl;
+					cout << "Empates: " << time.empates << endl;
+					cout << "Derrotas: " << time.derrotas << endl;
+					cout << "Agora escolha o que voce vai editar: " << endl;
+					cout << "1. Nome." << endl;
+					cout << "2. Vitorias." << endl;
+					cout << "3.	Empates" << endl;
+					cout << "4. Derrotas" << endl;
+					cout << "-1. Voltar" << endl;
+					cin >> escolhaDoQueFazer;
+					EditarCampo(escolhaDoQueFazer, posicaoInicioTime, time);
+					
+					break;
+				}
+				posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+			}
+			break;
+		case 2:
+			break;
+		default:
+			break;
 	}
 	arq.close();
+}
+
+
+void EditarCampo(int escolhaUsuario, int posicaoTime, Time time) {
+	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
+	switch (escolhaUsuario)
+	{
+	case 1:
+		arqEscrita.seekp(posicaoTime);//aponta o ponteiro de escrita para a posicao desejada
+		cout << "Digite o novo nome do time:" << endl;
+		cin >> time.nome;
+		arqEscrita.write((char*)&time, sizeof(Time));
+		break;
+	case 2:
+		arqEscrita.seekp(posicaoTime);//aponta o ponteiro de escrita para a posicao desejada
+		cout << "Digite o novo numero de vitorias do time:" << endl;
+		cin >> time.vitorias;
+		time.pontos = (time.vitorias * 3) + time.empates;
+		arqEscrita.write((char*)&time, sizeof(Time));
+		break;
+	case 3:
+		arqEscrita.seekp(posicaoTime);//aponta o ponteiro de escrita para a posicao desejada
+		cout << "Digite o novo numero de empates do time:" << endl;
+		cin >> time.empates;
+		time.pontos = (time.vitorias * 3) + time.empates;
+		arqEscrita.write((char*)&time, sizeof(Time));
+		break;
+	case 4:
+		arqEscrita.seekp(posicaoTime);//aponta o ponteiro de escrita para a posicao desejada
+		cout << "Digite o novo numero de derrotas do time:" << endl;
+		cin >> time.derrotas;
+		arqEscrita.write((char*)&time, sizeof(Time));
+		break;
+	case -1:
+		break;
+	default:
+
+		break;
+	}
 }
 
