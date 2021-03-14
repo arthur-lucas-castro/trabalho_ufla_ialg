@@ -34,6 +34,5 @@
 *.txt
 *.idb
 # Executables
-*.exe
 *.out
 *.app
