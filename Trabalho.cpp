@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <fstream>  
 using namespace std;
 
 struct Time
@@ -13,8 +14,20 @@ struct Time
 	int empates;
 };
 
+void criaArquivo() {
+	struct stat buffer;
+	string nomeArquivo = "listaTimes.txt";
+	bool verificaSeArquivoExiste = stat(nomeArquivo.c_str(), &buffer) == 0;
+
+	if (!verificaSeArquivoExiste) {
+		ofstream outfile(nomeArquivo);
+
+		outfile << "listona cabulosa" << endl;
+		outfile.close();
+	}
+}
 int main()
 {
-
+	criaArquivo();
 }
 
