@@ -24,7 +24,9 @@ void editarTime();
 void quickSort( int inicio, int final);
 int particionar( int inicio, int final);
 void trocar(int pos1, int pos2);
-string nomeArquivo = "listaTimes.txt";
+void deletarTime();
+
+string nomeArquivo = "listaTimes.dat";
 
 
 
@@ -51,7 +53,7 @@ int main()
 			editarTime();
 			break;
 		case(4):
-			cout << "Funcionalidade indisponível no momento";
+			deletarTime();
 			break;
 		case(5):
 			repetir = false;
@@ -61,7 +63,7 @@ int main()
 			cout << "Escolha inválida";
 			break;
 		}
-	}	
+	}
 }
 
 void insereTime() {
@@ -77,7 +79,7 @@ void insereTime() {
 void leTime() {
 	ifstream arq;
 
-	arq.open(nomeArquivo);	
+	arq.open(nomeArquivo);
 
 	Time time;
 	/*int size = sizeof(Time);
@@ -93,9 +95,10 @@ void leTime() {
 	cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
 	while (arq.read((char*)&time, sizeof(Time)))
 	{
-		
-		cout << '|' << setw(10) << time.nome << '|' << setw(10) << time.pontos << '|' << setw(10) << time.vitorias << '|' << setw(10) << time.empates << '|' << setw(10) << time.derrotas << '|' << endl;
-		cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
+		if (strlen(time.nome) > 0) {
+			cout << '|' << setw(10) << time.nome << '|' << setw(10) << time.pontos << '|' << setw(10) << time.vitorias << '|' << setw(10) << time.empates << '|' << setw(10) << time.derrotas << '|' << endl;
+			cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
+		}
 		//cout << time.nome << " " << time.pontos << " " << endl;
 	}
 	
@@ -118,35 +121,35 @@ void editarTime() {
 	int posicaoInicioTime = 0;
 	switch (escolhaDoQueFazer)
 	{
-		case 1:
-			cout << "Digite o nome do Time que deseja editar:" << endl;
-			cin >> nome;
-			while (arq.read((char*)&time, sizeof(Time)))
-			{
-				if (time.nome == nome) {
-				
-					cout << "Encontramos o time desejado, Atualmente essa é a situaçao dele:" << endl;
-					cout << "Nome: " << time.nome << endl;
-					cout << "Pontos: " << time.pontos << endl;
-					cout << "Vitorias: " << time.vitorias << endl;
-					cout << "Empates: " << time.empates << endl;
-					cout << "Derrotas: " << time.derrotas << endl;
-					cout << "Agora escolha o que voce vai editar: " << endl;
-					cout << "1. Nome." << endl;
-					cout << "2. Vitorias." << endl;
-					cout << "3.	Empates" << endl;
-					cout << "4. Derrotas" << endl;
-					cout << "-1. Voltar" << endl;
-					cin >> escolhaDoQueFazer;
-					EditarCampo(escolhaDoQueFazer, posicaoInicioTime, time);
-				}
-				posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+	case 1:
+		cout << "Digite o nome do Time que deseja editar:" << endl;
+		cin >> nome;
+		while (arq.read((char*)&time, sizeof(Time)))
+		{
+			if (time.nome == nome) {
+
+				cout << "Encontramos o time desejado, Atualmente essa é a situaçao dele:" << endl;
+				cout << "Nome: " << time.nome << endl;
+				cout << "Pontos: " << time.pontos << endl;
+				cout << "Vitorias: " << time.vitorias << endl;
+				cout << "Empates: " << time.empates << endl;
+				cout << "Derrotas: " << time.derrotas << endl;
+				cout << "Agora escolha o que voce vai editar: " << endl;
+				cout << "1. Nome." << endl;
+				cout << "2. Vitorias." << endl;
+				cout << "3.	Empates" << endl;
+				cout << "4. Derrotas" << endl;
+				cout << "-1. Voltar" << endl;
+				cin >> escolhaDoQueFazer;
+				EditarCampo(escolhaDoQueFazer, posicaoInicioTime, time);
 			}
-			break;
-		case 2:
-			break;
-		default:
-			break;
+			posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+		}
+		break;
+	case 2:
+		break;
+	default:
+		break;
 	}
 	arq.close();
 }
@@ -259,4 +262,24 @@ void trocar(int pos1, int pos2)
 	arq.close();
 	arqEscrita.close();
 
+}
+void deletarTime() {
+
+	ifstream arq(nomeArquivo);
+
+	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
+	string nomeTime;
+	cout << "Escolha o time a ser deletado:" << endl;
+	cin >> nomeTime;
+	Time time;
+	int posicaoInicioTime = 0;
+	while (arq.read((char*)&time, sizeof(Time)))
+	{
+		if (time.nome == nomeTime) {
+			arqEscrita.seekp(posicaoInicioTime);//aponta o ponteiro de escrita para a posicao desejada
+			arqEscrita.write((char*)&"\0", sizeof(Time));
+		}
+		posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+	}
+	arq.close();
 }
