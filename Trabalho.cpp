@@ -35,7 +35,6 @@ int main()
 		switch (escolhaDoQueFazer) {
 		case(1):
 			insereTime();
-			system("CLS");
 			break;
 		case(2):
 			leTime();
