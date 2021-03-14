@@ -1,0 +1,2 @@
+C:\Workspace\trabalho_ufla_ialg\x64\Debug\Trabalho.exe
+C:\Workspace\trabalho_ufla_ialg\x64\Debug\Trabalho.pdb
