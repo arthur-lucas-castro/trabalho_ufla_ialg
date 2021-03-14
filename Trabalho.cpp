@@ -2,27 +2,43 @@
 //
 
 #include <iostream>
+#include <fstream>  
 #include <vector>
 using namespace std;
+struct Time
+{
+    string nome;
+    int pontos;
+    int vitorias;
+    int derrotas;
+    int empates;
+};
 
 void trocar(Time* a, Time* b);
 int particionar(vector<Time>& vetor, int inicio, int final);
 void quickSort(vector<Time>& vetor, int inicio, int final);
-struct Time
-{
-	string nome;
-	int pontos;
-	int vitorias;
-	int derrotas;
-	int empates;
-};
+void criaArquivo();
+
+
 
 int main()
 {
-
+	criaArquivo();
 }
 
 
+void criaArquivo() {
+    struct stat buffer;
+    string nomeArquivo = "listaTimes.txt";
+    bool verificaSeArquivoExiste = stat(nomeArquivo.c_str(), &buffer) == 0;
+
+    if (!verificaSeArquivoExiste) {
+        ofstream outfile(nomeArquivo);
+
+        outfile << "listona cabulosa" << endl;
+        outfile.close();
+    }
+}
 
 void quickSort(vector<Time>& vetor, int inicio, int final) {
     if (inicio < final)
