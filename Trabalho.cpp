@@ -17,14 +17,15 @@ struct Time
 	int posicao;
 };
 
-void EditarCampo(int escolhaUsuario, int posicaoTime, Time time);
+void EditarCampo(int escolhaUsuario, int posicaoTime, Time time, vector<int> posicoesTodosItens);
 void insereTime();
 void leTime();
 void editarTime();
-void quickSort( int inicio, int final);
-int particionar( int inicio, int final);
+void quickSort(vector<int> posicoesTodosItens, int inicio, int final);
+int particionar(vector<int> posicoesTodosItens, int inicio, int final);
 void trocar(int pos1, int pos2);
 void deletarTime();
+vector<int> getAllposicoes();
 
 string nomeArquivo = "listaTimes.dat";
 
@@ -67,30 +68,21 @@ int main()
 }
 
 void insereTime() {
-	ofstream arq(nomeArquivo, fstream::app);
+	ofstream arq(nomeArquivo, fstream::app | fstream::binary );
 
 	Time time;
 	cin >> time.nome >> time.pontos >> time.vitorias >> time.derrotas >> time.empates;
-	arq.write((char*)&time, sizeof(time));
-
+	cout << sizeof(Time) << endl;
+	cout << sizeof(time) << endl;
+	arq.write((char*)&time, sizeof(Time));
 	arq.close();
 }
 
 void leTime() {
-	ifstream arq;
+	ifstream arq(nomeArquivo,  fstream::binary);
 
-	arq.open(nomeArquivo);
-
-	Time time;
-	/*int size = sizeof(Time);
-	arq.read((char*)&time, sizeof(Time));
-	cout << arq.beg << endl;
-	//cout << arq.end - size << endl;
-	//arq.read((char*)&time, sizeof(Time));
-	arq.seekg(64, arq.beg);
 	
-	arq.read((char*)&time, sizeof(Time));
-	cout << time.nome;*/
+	Time time;
 	cout << '|' << setw(10) << "NOME" << '|' << setw(10) << "PONTOS" << '|' << setw(10) << "VITORIAS" << '|' << setw(10) << "EMPATES" << '|' << setw(10) << "DERROTAS" << '|' << endl;
 	cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
 	while (arq.read((char*)&time, sizeof(Time)))
@@ -106,28 +98,44 @@ void leTime() {
 	arq.close();
 }
 
+vector<int> getAllposicoes() {
+	ifstream arq(nomeArquivo, fstream::binary);
+	Time time;
+	vector<int> posicoes;
+	int posicaoInicioTime = 0;
+	while (arq.read((char*)&time, sizeof(Time)))
+	{
+
+		if (strlen(time.nome) > 0) {
+			posicoes.push_back(posicaoInicioTime);
+
+		}
+		posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+	}
+	return posicoes;
+}
 void editarTime() {
 
-	ifstream arq(nomeArquivo);
+	ifstream arq(nomeArquivo, fstream::binary);
 
-	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
 	string nome;
 	int escolhaDoQueFazer;
 	cout << "Qual o criterio para a ediçao:" << endl;
 	cout << "1. Por nome do time" << endl;
 	cout << "2. Por colocaçao do time na tabela" << endl;
 	cin >> escolhaDoQueFazer;
-	Time time;
 	int posicaoInicioTime = 0;
 	switch (escolhaDoQueFazer)
 	{
 	case 1:
+		arq.seekg(0);
 		cout << "Digite o nome do Time que deseja editar:" << endl;
 		cin >> nome;
+
+		Time time;
 		while (arq.read((char*)&time, sizeof(Time)))
 		{
 			if (time.nome == nome) {
-
 				cout << "Encontramos o time desejado, Atualmente essa é a situaçao dele:" << endl;
 				cout << "Nome: " << time.nome << endl;
 				cout << "Pontos: " << time.pontos << endl;
@@ -141,22 +149,26 @@ void editarTime() {
 				cout << "4. Derrotas" << endl;
 				cout << "-1. Voltar" << endl;
 				cin >> escolhaDoQueFazer;
-				EditarCampo(escolhaDoQueFazer, posicaoInicioTime, time);
+				EditarCampo(escolhaDoQueFazer, posicaoInicioTime, time, getAllposicoes());
 			}
 			posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
 		}
+
 		break;
 	case 2:
 		break;
 	default:
 		break;
 	}
+
 	arq.close();
 }
 
 
-void EditarCampo(int escolhaUsuario, int posicaoTime, Time time) {
-	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
+void EditarCampo(int escolhaUsuario, int posicaoTime, Time time, vector<int> posicoesTodosItens) {
+	//ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in );
+	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in | fstream::binary);
+	ifstream arq(nomeArquivo, ios::binary);
 	int size = sizeof(Time);
 	switch (escolhaUsuario)
 	{
@@ -172,8 +184,9 @@ void EditarCampo(int escolhaUsuario, int posicaoTime, Time time) {
 		cin >> time.vitorias;
 		time.pontos = (time.vitorias * 3) + time.empates;
 		arqEscrita.write((char*)&time, sizeof(Time));
+		arqEscrita.close();
 		
-		quickSort(arqEscrita.beg, (-1 * (size)));
+		quickSort(posicoesTodosItens, arqEscrita.beg, posicoesTodosItens.size()-1);
 		break;
 	case 3:
 		arqEscrita.seekp(posicaoTime);//aponta o ponteiro de escrita para a posicao desejada
@@ -181,6 +194,8 @@ void EditarCampo(int escolhaUsuario, int posicaoTime, Time time) {
 		cin >> time.empates;
 		time.pontos = (time.vitorias * 3) + time.empates;
 		arqEscrita.write((char*)&time, sizeof(Time));
+		arqEscrita.close();
+		quickSort(posicoesTodosItens, arqEscrita.beg, posicoesTodosItens.size() - 1);
 		break;
 	case 4:
 		arqEscrita.seekp(posicaoTime);//aponta o ponteiro de escrita para a posicao desejada
@@ -194,71 +209,73 @@ void EditarCampo(int escolhaUsuario, int posicaoTime, Time time) {
 
 		break;
 	}
+	arqEscrita.close();
 }
-void quickSort( int inicio, int final) {
+void quickSort(vector<int> posicoesTodosItens, int inicio, int final) {
+
+
 	int size = sizeof(Time);
-	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
-	if (inicio > final)
+	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in | fstream::binary);
+	if (inicio < final)
 	{
-		int pi = particionar(inicio, final);
-		quickSort( inicio, pi - (size + 1));
-		quickSort( pi + (size + 1), final);
+		int pi = particionar(posicoesTodosItens, inicio, final);
+		quickSort(posicoesTodosItens, inicio, pi - 1);
+		quickSort(posicoesTodosItens, pi + 1, final);
 	}
 	arqEscrita.close();
 }
-int particionar( int inicio, int final)
+int particionar(vector<int> posicoesTodosItens, int inicio, int final)
 {
 	Time time;
-	ifstream arq(nomeArquivo);
+	ifstream arq(nomeArquivo, fstream::binary);
 	int size = sizeof(Time);
-	arq.seekg(final, arq.end);
+	arq.seekg(posicoesTodosItens[final], arq.beg);
 
 	arq.read((char*)&time, sizeof(Time));
-	int pivo = time.pontos;
-    int i = (inicio - (size+1));
+	Time timePivo = time;
+    int i = (inicio - 1);
 
-    for (int j = inicio; j >= final; j -= (size + 1))
+    for (int j = inicio; j <= final-1; j++)
     {
-		arq.seekg(j, arq.beg);
+		arq.seekg(posicoesTodosItens[j], arq.beg);
 
 		arq.read((char*)&time, sizeof(Time));
-        if (time.pontos < pivo)
+        if (time.pontos >= timePivo.pontos)
         {
-            i += (size + 1);
-            trocar(i, j);// i = 33
+			if (time.pontos == timePivo.pontos) {
+				if (time.vitorias > timePivo.vitorias) {
+					i++;
+					trocar(posicoesTodosItens[i], posicoesTodosItens[j]);
+				}
+			}
+			else {
+				i++;
+				trocar(posicoesTodosItens[i], posicoesTodosItens[j]);
+			}
+
         }
     }
-    trocar(i + (size + 1), (-1* (size + 1)));
+    trocar(posicoesTodosItens[i+1], posicoesTodosItens[final]);
 	arq.close();
-    return (i - (size + 1));
+    return (i + 1);
 }
 void trocar(int pos1, int pos2)
 {
-	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
+	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in | fstream::binary);
 	ifstream arq(nomeArquivo);
 	arq.seekg(pos1, arq.beg);
 	Time time;
 	arq.read((char*)&time, sizeof(Time));
     Time aux = time;
-	if (pos2 < 0) {
-		arq.seekg(pos2, arq.end);
-		arq.read((char*)&time, sizeof(Time));
-		arqEscrita.seekp(pos1, arq.beg);
-		arqEscrita.write((char*)&time, sizeof(time));
-		arqEscrita.seekp(pos2, arq.end);
-		arqEscrita.write((char*)&aux, sizeof(time));
-
-	}
-	else {
 	arq.seekg(pos2, arq.beg);
 	arq.read((char*)&time, sizeof(Time));
 	arqEscrita.seekp(pos1, arq.beg);
 	arqEscrita.write((char*)&time, sizeof(time));
+	arqEscrita.close();
+	arqEscrita.open(nomeArquivo, fstream::out | fstream::in | fstream::binary);
 	arqEscrita.seekp(pos2, arq.beg);
 	arqEscrita.write((char*)&aux, sizeof(time));
-	}
 
-	
 	arq.close();
 	arqEscrita.close();
 
