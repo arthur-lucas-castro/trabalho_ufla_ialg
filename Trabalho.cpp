@@ -71,11 +71,10 @@ void leTime() {
 
 	arq.open(nomeArquivo);	
 
-	
-	while (!arq.eof())
+	Time time;
+
+	while (arq.read((char*)&time, sizeof(Time)))
 	{
-		Time time;
-		arq.read((char*)&time, sizeof(Time));
 		cout << time.nome << endl;
 	}
 
