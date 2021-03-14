@@ -188,6 +188,7 @@ void deletarTime() {
 
 	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
 	string nomeTime;
+	bool encontrou = false;
 	cout << "Escolha o time a ser deletado:" << endl;
 	cin >> nomeTime;
 	Time time;
@@ -197,8 +198,11 @@ void deletarTime() {
 		if (time.nome == nomeTime) {
 			arqEscrita.seekp(posicaoInicioTime);//aponta o ponteiro de escrita para a posicao desejada
 			arqEscrita.write((char*)&"\0", sizeof(Time));
+			encontrou = true;
 		}
 		posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
 	}
+	if (!encontrou)
+		cout << "Nenhum time encontrado." << endl;
 	arq.close();
 }

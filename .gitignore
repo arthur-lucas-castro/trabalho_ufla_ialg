@@ -36,3 +36,4 @@
 # Executables
 *.out
 *.app
+/x64/Debug/Trabalho.exe
