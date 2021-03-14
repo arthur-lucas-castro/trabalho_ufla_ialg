@@ -9,6 +9,7 @@ using namespace std;
 
 void insereTime();
 void leTime();
+void editarTime();
 string nomeArquivo = "listaTimes.txt";
 
 struct Time
@@ -40,7 +41,7 @@ int main()
 			leTime();
 			break;
 		case(3):
-			cout << "Funcionalidade indisponível no momento";
+			editarTime();
 			break;
 		case(4):
 			cout << "Funcionalidade indisponível no momento";
@@ -60,8 +61,8 @@ void insereTime() {
 
 	Time time;
 	cin >> time.nome >> time.pontos >> time.vitorias >> time.derrotas >> time.empates;
-	arq.seekp(10);
 	arq.write((char*)&time, sizeof(time));
+
 	//arq << time.nome << ";" << time.pontos << ";" << time.vitorias << ";" << time.derrotas << ";" << time.empates << ";" << endl;
 	arq.close();
 }
@@ -75,10 +76,32 @@ void leTime() {
 
 	while (arq.read((char*)&time, sizeof(Time)))
 	{
-		cout << time.nome << endl;
+		cout << time.nome << " " << time.pontos << " " << endl;
 	}
 
 
+	arq.close();
+}
+
+void editarTime() {
+
+	ifstream arq(nomeArquivo);
+
+	ofstream arqEscrita(nomeArquivo, fstream::out | fstream::in);
+	string nome;
+	cin >> nome;
+	Time time;
+	int posicaoItemAnterior = 0;
+	while (arq.read((char*)&time, sizeof(Time)))
+	{		
+		if (time.nome == nome) {
+			
+			arqEscrita.seekp(posicaoItemAnterior);//aponta o ponteiro de escrita para a posicao desejada
+			cin >> time.nome;
+			arqEscrita.write((char*)&time, sizeof(Time));
+		}
+		posicaoItemAnterior = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+	}
 	arq.close();
 }
 
