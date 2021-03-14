@@ -27,7 +27,12 @@
 *.a
 *.lib
 *.tlog
-
+*.recipe
+*.ilk
+*.log
+*.pdb
+*.txt
+*.idb
 # Executables
 *.exe
 *.out
