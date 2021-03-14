@@ -13,7 +13,7 @@ string nomeArquivo = "listaTimes.txt";
 
 struct Time
 {
-	string nome;
+	char nome[10];
 	int pontos;
 	int vitorias;
 	int derrotas;
@@ -61,7 +61,9 @@ void insereTime() {
 
 	Time time;
 	cin >> time.nome >> time.pontos >> time.vitorias >> time.derrotas >> time.empates;
-	arq << time.nome << ";" << time.pontos << ";" << time.vitorias << ";" << time.derrotas << ";" << time.empates << ";" << endl;
+	arq.seekp(10);
+	arq.write((char*)&time, sizeof(time));
+	//arq << time.nome << ";" << time.pontos << ";" << time.vitorias << ";" << time.derrotas << ";" << time.empates << ";" << endl;
 	arq.close();
 }
 
@@ -69,10 +71,16 @@ void leTime() {
 	ifstream arq;
 
 	arq.open(nomeArquivo);	
-	string line;
-	while (getline(arq, line)) {
-		cout << line << endl;
+
+	
+	while (!arq.eof())
+	{
+		Time time;
+		arq.read((char*)&time, sizeof(Time));
+		cout << time.nome << endl;
 	}
+
+
 	arq.close();
 }
 
