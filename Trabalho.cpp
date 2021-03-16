@@ -14,7 +14,6 @@ struct Time
 	int vitorias;
 	int derrotas;
 	int empates;
-	int posicao;
 };
 
 void EditarCampo(int escolhaUsuario, int posicaoTime, Time time, vector<int> posicoesTodosItens);
@@ -25,9 +24,18 @@ void quickSort(vector<int> posicoesTodosItens, int inicio, int final);
 int particionar(vector<int> posicoesTodosItens, int inicio, int final);
 void trocar(int pos1, int pos2);
 void deletarTime();
+void PrimeiraInicializacao();
+void MenuBusca();
+Time buscaTimePorNome(string nomePesquisado, int& posicaoEncotrado);
 vector<int> getAllposicoes();
-
+void trocarVirtual(int* pos1, int* pos2);
+int particionarVirtual(vector<int> &posicoesTodosItens, int inicio, int final, int chaveOrdenacao);
+void quickSortVirtual(vector<int> &posicoesTodosItens, int inicio, int final, int chaveOrdenacao);
 string nomeArquivo = "listaTimes.dat";
+int escolherTipoOrdenacao(vector<int>& posicoesTodosItens, Time time, Time timePivo, int chaveOrdenacao, int index, int j);
+void ExibirInformacoesAdicionais();
+Time buscaTimePorNome(string nomePesquisado, int& posicaoEncotrado, vector<int> posicoesTodosItens);
+
 
 
 
@@ -57,6 +65,12 @@ int main()
 			deletarTime();
 			break;
 		case(5):
+			ExibirInformacoesAdicionais();
+			break;
+		case(6):
+			MenuBusca();
+			break;
+		case(7):
 			repetir = false;
 			break;
 		default:
@@ -91,7 +105,6 @@ void leTime() {
 			cout << '|' << setw(10) << time.nome << '|' << setw(10) << time.pontos << '|' << setw(10) << time.vitorias << '|' << setw(10) << time.empates << '|' << setw(10) << time.derrotas << '|' << endl;
 			cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
 		}
-		//cout << time.nome << " " << time.pontos << " " << endl;
 	}
 	
 
@@ -117,7 +130,7 @@ vector<int> getAllposicoes() {
 void editarTime() {
 
 	ifstream arq(nomeArquivo, fstream::binary);
-
+	Time timeEncontrado;
 	string nome;
 	int escolhaDoQueFazer;
 	cout << "Qual o criterio para a ediçao:" << endl;
@@ -128,37 +141,28 @@ void editarTime() {
 	switch (escolhaDoQueFazer)
 	{
 	case 1:
-		arq.seekg(0);
+		
+		int posicaoInicioTime = 0;
 		cout << "Digite o nome do Time que deseja editar:" << endl;
 		cin >> nome;
-
-		Time time;
-		while (arq.read((char*)&time, sizeof(Time)))
-		{
-			if (time.nome == nome) {
-				cout << "Encontramos o time desejado, Atualmente essa é a situaçao dele:" << endl;
-				cout << "Nome: " << time.nome << endl;
-				cout << "Pontos: " << time.pontos << endl;
-				cout << "Vitorias: " << time.vitorias << endl;
-				cout << "Empates: " << time.empates << endl;
-				cout << "Derrotas: " << time.derrotas << endl;
-				cout << "Agora escolha o que voce vai editar: " << endl;
-				cout << "1. Nome." << endl;
-				cout << "2. Vitorias." << endl;
-				cout << "3.	Empates" << endl;
-				cout << "4. Derrotas" << endl;
-				cout << "-1. Voltar" << endl;
-				cin >> escolhaDoQueFazer;
-				EditarCampo(escolhaDoQueFazer, posicaoInicioTime, time, getAllposicoes());
-			}
-			posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
-		}
+		timeEncontrado = buscaTimePorNome(nome, posicaoInicioTime);
+		cout << "Encontramos o time desejado, Atualmente essa é a situaçao dele:" << endl;
+		cout << "Nome: " << timeEncontrado.nome << endl;
+		cout << "Pontos: " << timeEncontrado.pontos << endl;
+		cout << "Vitorias: " << timeEncontrado.vitorias << endl;
+		cout << "Empates: " << timeEncontrado.empates << endl;
+		cout << "Derrotas: " << timeEncontrado.derrotas << endl;
+		cout << "Agora escolha o que voce vai editar: " << endl;
+		cout << "1. Nome." << endl;
+		cout << "2. Vitorias." << endl;
+		cout << "3. Empates." << endl;
+		cout << "4. Derrotas." << endl;
+		cout << "-1. Voltar" << endl;
+		cin >> escolhaDoQueFazer;
+		EditarCampo(escolhaDoQueFazer, posicaoInicioTime, timeEncontrado, getAllposicoes());
 
 		break;
-	case 2:
-		break;
-	default:
-		break;
+
 	}
 
 	arq.close();
@@ -303,4 +307,219 @@ void deletarTime() {
 	if (!encontrou)
 		cout << "Nenhum time encontrado." << endl;
 	arq.close();
+}
+Time buscaTimePorNome(string nomePesquisado, int& posicaoEncotrado) {
+
+	ifstream arq(nomeArquivo, fstream::binary);
+
+	int posicaoInicioTime = 0;
+
+	Time time;
+	while (arq.read((char*)&time, sizeof(Time)))
+	{
+		if (time.nome == nomePesquisado) {
+			posicaoEncotrado = posicaoInicioTime;
+			return time;
+		}
+		posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+	}
+	posicaoInicioTime = -1;
+	return time;
+}
+Time buscaTimePorNome(string nomePesquisado, int& posicaoEncotrado, vector<int> posicoesTodosItens) {
+
+	ifstream arq(nomeArquivo, fstream::binary);
+	Time time, timeEncontrado;
+	int inicio = 0, fim = posicoesTodosItens.size()-1, meio;
+	bool encontrou = false;
+
+
+	while (inicio <= fim && !encontrou)
+	{
+		meio = (inicio + fim) / 2;
+		arq.seekg(posicoesTodosItens[meio]);
+		arq.read((char*)&time, sizeof(Time));
+		if (strcmp(nomePesquisado.c_str(), time.nome) > 0)
+		{
+			inicio = meio + 1;
+
+		}
+		else if (strcmp(nomePesquisado.c_str(), time.nome) < 0)
+		{
+			fim = meio - 1;
+		}
+		else {
+			encontrou = true;
+			return time;
+		}
+			
+	}
+
+
+
+
+}
+void MenuBusca() {
+
+	int escolhaUsuario;
+	cout << "Escolha como sera sua busca:" << endl;
+	cout << "1. Busca por Nome" << endl;
+	cout << "2. Busca por Pontuacao:" << endl;
+	cout << "3. Busca por numero de Vitorias:" << endl;
+	cin >> escolhaUsuario;
+	string nome;
+	Time timeEncontrado;
+	switch (escolhaUsuario)
+	{
+	case 1:		
+		cout << "Digite o nome do Time que deseja buscar:" << endl;
+		cin >> nome;
+		int posicaoInicioTime = 0;
+		vector<int> todasPosicoes = getAllposicoes();
+		quickSortVirtual(todasPosicoes, 0, todasPosicoes.size() - 1, 4);
+		timeEncontrado = buscaTimePorNome(nome, posicaoInicioTime, todasPosicoes);
+		if (posicaoInicioTime == -1) {
+			cout << "Time nao encontrado" << endl;
+		}
+		break;
+	
+	}
+}
+
+void ExibirInformacoesAdicionais() {// melhor identacao;
+	int opcaoEscolhida;
+	cin >> opcaoEscolhida;
+
+	vector<int> todasPosicoes = getAllposicoes();
+	quickSortVirtual(todasPosicoes, 0, todasPosicoes.size() - 1, opcaoEscolhida);
+	ifstream arq(nomeArquivo, fstream::binary);
+	Time time;
+	cout << '|' << setw(10) << "NOME" << '|' << setw(10) << "PONTOS" << '|' << setw(10) << "VITORIAS" << '|' << setw(10) << "EMPATES" << '|' << setw(10) << "DERROTAS" << '|' << endl;
+	cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
+	for (int i = 0; i < todasPosicoes.size(); i++) {
+		arq.seekg(todasPosicoes[i]);
+		arq.read((char*)&time, sizeof(Time));
+		if (strlen(time.nome) > 0) {
+			cout << '|' << setw(10) << time.nome << '|' << setw(10) << time.pontos << '|' << setw(10) << time.vitorias << '|' << setw(10) << time.empates << '|' << setw(10) << time.derrotas << '|' << endl;
+			cout << '|' << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << '|' << setw(10) << "----------" << "|" << endl;
+		}
+
+	}
+
+	arq.close();
+}
+
+
+void quickSortVirtual(vector<int> &posicoesTodosItens, int inicio, int final, int chaveOrdenacao) {
+	int pi = 0;
+	if (inicio < final)
+	{
+
+
+			pi = particionarVirtual(posicoesTodosItens, inicio, final, chaveOrdenacao);
+			quickSortVirtual(posicoesTodosItens, inicio, pi - 1, chaveOrdenacao);
+			quickSortVirtual(posicoesTodosItens, pi + 1, final, chaveOrdenacao);
+		
+	}
+}
+
+int particionarVirtual(vector<int> &posicoesTodosItens, int inicio, int final, int chaveOrdenacao)
+{
+	Time time;
+	ifstream arq(nomeArquivo, fstream::binary);
+	int size = sizeof(Time);
+	arq.seekg(posicoesTodosItens[final], arq.beg);
+
+	arq.read((char*)&time, sizeof(Time));
+	Time timePivo = time;
+	int i = (inicio - 1);
+
+	for (int j = inicio; j <= final - 1; j++)
+	{
+		arq.seekg(posicoesTodosItens[j], arq.beg);
+
+		arq.read((char*)&time, sizeof(Time));
+		i = escolherTipoOrdenacao(posicoesTodosItens, time, timePivo, chaveOrdenacao, i, j);
+
+	}
+	trocarVirtual(&posicoesTodosItens[i + 1], &posicoesTodosItens[final]);
+	arq.close();
+	return (i + 1);
+
+}
+
+int escolherTipoOrdenacao(vector<int>& posicoesTodosItens, Time time, Time timePivo, int chaveOrdenacao, int index, int j) {
+	switch (chaveOrdenacao)
+	{
+	case 1:
+		if (time.vitorias >= timePivo.vitorias)
+		{
+			if (time.vitorias == timePivo.vitorias) {
+				if (time.pontos > timePivo.pontos) {
+					index++;
+					trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+				}
+			}
+			else {
+				index++;
+				trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+			}
+		}
+		break;
+	case 2:
+		if (time.derrotas >= timePivo.derrotas)
+		{
+			if (time.derrotas == timePivo.derrotas) {
+				if (time.pontos > timePivo.pontos) {
+					index++;
+					trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+				}
+			}
+			else {
+				index++;
+				trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+			}
+		}
+		break;
+	case 3:
+		if (time.empates >= timePivo.empates)
+		{
+			if (time.empates == timePivo.empates) {
+				if (time.pontos > timePivo.pontos) {
+					index++;
+					trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+				}
+			}
+			else {
+				index++;
+				trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+			}
+		}
+		break;
+	case 4:
+		if (strcmp(time.nome, timePivo.nome) <= 0)
+		{
+			if (time.nome == timePivo.nome) {
+				if (time.pontos > timePivo.pontos) {
+					index++;
+					trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+				}
+			}
+			else {
+				index++;
+				trocarVirtual(&posicoesTodosItens[index], &posicoesTodosItens[j]);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	return index;
+}
+
+void trocarVirtual(int* pos1, int* pos2)
+{
+	int aux = *pos1;
+	*pos1 = *pos2;
+	*pos2 = aux;
 }
