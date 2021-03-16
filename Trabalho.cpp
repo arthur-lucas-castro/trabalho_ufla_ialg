@@ -82,14 +82,28 @@ int main()
 }
 
 void insereTime() {
-	ofstream arq(nomeArquivo, fstream::app | fstream::binary );
+	ifstream arq(nomeArquivo, fstream::binary);
 
-	Time time;
+	ofstream arqEscritaCasoHajaRegistroDeletado(nomeArquivo, fstream::out | fstream::in | fstream::binary);
+	ofstream arqEscritaCasoNaoHajaRegistroDeletado(nomeArquivo, fstream::app | fstream::binary);
+	bool encontrou = false;
+	Time time, timePesquisa;
 	cin >> time.nome >> time.pontos >> time.vitorias >> time.derrotas >> time.empates;
-	cout << sizeof(Time) << endl;
-	cout << sizeof(time) << endl;
-	arq.write((char*)&time, sizeof(Time));
+	int posicaoInicioTime = 0;
+	while (arq.read((char*)&timePesquisa, sizeof(Time)) && encontrou == false)
+	{
+		if (strlen(timePesquisa.nome) == 0) {
+			arqEscritaCasoHajaRegistroDeletado.seekp(posicaoInicioTime);//aponta o ponteiro de escrita para a posicao desejada
+			arqEscritaCasoHajaRegistroDeletado.write((char*)&time, sizeof(Time));
+			encontrou = true;
+		}
+		posicaoInicioTime = arq.tellg();//arq.tellg() pega a posiçao da ultima leitura
+	}
+	if (encontrou == false)
+		arqEscritaCasoNaoHajaRegistroDeletado.write((char*)&time, sizeof(Time));
+
 	arq.close();
+
 }
 
 void leTime() {
