@@ -7,6 +7,9 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
+#include <cstring>
+#include <limits>
+#pragma warning(disable:4996)//para rodar no compilador do Visual Studio, caso use o strncpy_s(ideal) alguns compiladores podem nao aceitar
 using namespace std;
 //struct
 struct Time
@@ -24,7 +27,7 @@ const int ORDENAR_POR_VITORIA = 1;
 const int ORDENAR_POR_DERROTAS = 2;
 const int ORDENAR_POR_EMPATES = 3;
 const int ORDENAR_POR_NOME = 4;
-const string NOME_ARQUIVO = "listaTimes.dat";
+const char NOME_ARQUIVO[15] = "listaTimes.dat";
 const string CARACTERES_INVALIDOS = ".,/ ";
 
 
@@ -124,7 +127,7 @@ void InserirTime() {
 	cin.ignore();
 	getline(cin, nome);
 	TrimFinal(nome);
-	strncpy_s(time.nome, nome.c_str(), 14);
+	strncpy(time.nome, nome.c_str(), 14);
 	cout << "Digite o numero de vitorias:" << endl;
 	time.vitorias = tratarInput(time.vitorias);
 	cout << "Digite o numero de empates:" << endl;
@@ -270,7 +273,7 @@ void DeletarTime()
 		return;
 	}
 	arqEscrita.seekp(posicaoInicioTime);//aponta o ponteiro de escrita para a posicao desejada
-	Time *timeNull = nullptr;
+	Time *timeNull = NULL;
 	arqEscrita.write((char*)&timeNull, sizeof(Time));
 	arqEscrita.close();
 	cout << "Deletado com Sucesso" << endl;
@@ -336,6 +339,7 @@ void MenuBusca() {
 			timeEncontrado = buscaTimePorNome(nome, posicaoInicioTime, todasPosicoes);
 			if (posicaoInicioTime == -1) {
 				cout << "Time nao encontrado" << endl;
+				break;
 			}
 			PrintarHeaderTabela();
 			PrintarLinhaTabela(timeEncontrado, 1);
@@ -347,6 +351,7 @@ void MenuBusca() {
 			timeEncontrado = buscaTimePorPontuacao(pontos, posicaoInicioTime, todasPosicoes);
 			if (posicaoInicioTime == -1) {
 				cout << "Time nao encontrado" << endl;
+				break;
 			}
 			PrintarHeaderTabela();
 			PrintarLinhaTabela(timeEncontrado, 1);
@@ -358,7 +363,7 @@ void MenuBusca() {
 			timeEncontrado = buscaTimePorPontuacao(pontos, posicaoInicioTime, todasPosicoes);
 			if (posicaoInicioTime == -1) {
 				cout << "Time nao encontrado" << endl;
-				return;
+				break;
 			}
 			PrintarHeaderTabela();
 			PrintarLinhaTabela(timeEncontrado, 1);
